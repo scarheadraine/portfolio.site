@@ -251,6 +251,12 @@ section h2 {
     border: 0;
     background: transparent;
     cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 160ms ease;
+}
+
+.overlay-narrate[aria-pressed="true"] {
+    opacity: 1;
 }
 
 .overlay-narrate img {
@@ -261,7 +267,7 @@ section h2 {
 
 .overlay-narrate:disabled {
     cursor: not-allowed;
-    opacity: 0.75;
+    opacity: 0.35;
 }
 
 .overlay-audio {

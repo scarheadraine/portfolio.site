@@ -187,6 +187,12 @@ document.addEventListener("DOMContentLoaded", () => {
         narrateButton.setAttribute("aria-label", "Play narration");
     });
 
+    narrationAudio.addEventListener("pause", () => {
+        narrateButton.setAttribute("aria-pressed", "false");
+        if (narrateButton.disabled) return;
+        narrateButton.setAttribute("aria-label", "Play narration");
+    });
+
     overlay.addEventListener("wheel", (event) => {
         event.preventDefault();
 
