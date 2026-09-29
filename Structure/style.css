@@ -566,6 +566,17 @@ section h2 {
     transform: translateY(-20%);
 }
 
+.pdf-heading-crop--resume {
+    width: min(115px, 100%);
+    aspect-ratio: 271.685 / 69.517;
+    overflow: visible;
+}
+
+.pdf-heading-crop--resume img {
+    position: static;
+    transform: none;
+}
+
 .pdf-document + .pdf-document {
     margin-top: 36px;
 }
