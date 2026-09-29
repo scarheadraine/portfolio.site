@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raine Cerankosky</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="preload" href="assets/frame0000.png" as="image" fetchpriority="high" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js" fetchpriority="high"></script>
+</head>
+<body>
+    <aside class="sidebar">
+        <object
+            id="standard-menu"
+            class="menu-svg desktop-only"
+            data-lazy-src="assets/menu bar.svg"
+            type="image/svg+xml"
+            aria-label="Portfolio navigation">
+        </object>
+
+        <object
+            id="condensed-menu"
+            class="menu-svg mobile-only"
+            data-lazy-src="assets/condensed menu bar.svg"
+            type="image/svg+xml"
+            aria-label="Portfolio navigation">
+        </object>
+    </aside>
+
+    <main class="content">
+        <div id="canvas-container"></div>
+
+        <section id="front-end-development">
+            <div class="mobile-section-label">
+                <img data-lazy-src="assets/frontendsectionlabel.svg" alt="Front End Development">
+            </div>
+            <h2>Front End Development</h2>
+
+            <div class="site-portal">
+                <div class="laptop-controls">
+                    <a
+                        class="visit-link"
+                        href="https://fortified.pro"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Visit Fortified Pro website">
+                        <img data-lazy-src="assets/visitlink.svg" alt="">
+                    </a>
+                    <button
+                        class="site-switch-toggle"
+                        type="button"
+                        aria-label="Switch to Fedder Building website preview">
+                        <img data-lazy-src="assets/switchtoggle.svg" alt="">
+                    </button>
+                </div>
+                <div class="laptop-stage">
+                    <div class="site-preview">
+                        <iframe
+                            data-lazy-src="https://fortified.pro"
+                            class="site-preview-frame"
+                            title="Fortified Pro website preview"
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                    <img data-lazy-src="assets/laptopframe.svg" alt="Laptop frame" class="laptop-frame">
+                    <img data-lazy-src="assets/mobileiframehousing.svg" alt="" class="mobile-phone-frame">
+                    <button
+                        class="trackpad-switch"
+                        type="button"
+                        aria-label="Switch to Fedder Building website preview">
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="illustration">
+            <div class="mobile-section-label">
+                <img data-lazy-src="assets/illustrationsectionlabel.svg" alt="Illustration">
+            </div>
+            <h2>Illustration</h2>
+
+            <div class="illustration-gallery">
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/choaslabel.svg" alt="Chaos" class="illustration-label">
+                    <img data-lazy-src="assets/chaos.jpg" alt="Chaos illustration" class="illustration-image">
+                </article>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/queasy2026inklabel.svg" alt="Queasy" class="illustration-label">
+                    <img data-lazy-src="assets/queasy.jpg" alt="Queasy illustration" class="illustration-image">
+                </article>
+                <div class="illustration-stack illustration-stack--home">
+                    <article class="illustration-card">
+                        <img data-lazy-src="assets/home2024inklabel.svg" alt="Home" class="illustration-label">
+                        <img data-lazy-src="assets/home.jpg" alt="Home illustration" class="illustration-image">
+                    </article>
+                    <article class="illustration-card">
+                        <img data-lazy-src="assets/selfportraitlabel.svg" alt="Self Portrait Sketch 2025" class="illustration-label">
+                        <img data-lazy-src="assets/selfportraitsketch2025.jpg" alt="Self portrait sketch from 2025" class="illustration-image">
+                    </article>
+                </div>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/glassoceanlabel.svg" alt="Glass Ocean" class="illustration-label">
+                    <img data-lazy-src="assets/glass ocean.jpg" alt="Glass Ocean illustration" class="illustration-image">
+                </article>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/livemodelsketchlabel.svg" alt="Live Model Sketch" class="illustration-label">
+                    <img data-lazy-src="assets/livemodelsketch.JPG" alt="Live Model Sketch drawing" class="illustration-image">
+                </article>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/sketch2024label.svg" alt="Sketch 2024" class="illustration-label">
+                    <img data-lazy-src="assets/sketch2024.jpg" alt="Sketch 2024 drawing" class="illustration-image">
+                </article>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/sketch2025inklabel.svg" alt="Sketch 2025" class="illustration-label">
+                    <img data-lazy-src="assets/sketch2025.jpg" alt="Sketch 2025 drawing" class="illustration-image">
+                </article>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/sketch2026graphite.svg" alt="Sketch 2026 graphite" class="illustration-label">
+                    <img data-lazy-src="assets/sketch2026graphite.png" alt="Sketch 2026 graphite drawing" class="illustration-image">
+                </article>
+            </div>
+        </section>
+
+        <section id="graphic-design">
+            <div class="mobile-section-label">
+                <img data-lazy-src="assets/graphicdesignsectionlabel.svg" alt="Graphic Design">
+            </div>
+            <h2>Graphic Design</h2>
+
+            <div class="illustration-gallery">
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/feddermakerscampuslabel.svg" alt="Fedder Makers Campus" class="illustration-label">
+                    <img data-lazy-src="assets/feddermakercampus.svg" alt="Fedder Makers Campus logo" class="illustration-image">
+                </article>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/guglielmorcrlabel.svg" alt="Sauced" class="illustration-label">
+                    <img data-lazy-src="assets/sauce'dlogo.jpg" alt="Sauced logo" class="illustration-image">
+                </article>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/nomaloftslogolabel.svg" alt="Noma Lofts" class="illustration-label">
+                    <img data-lazy-src="assets/nomalogo.svg" alt="Noma Lofts logo" class="illustration-image">
+                </article>
+                <article class="illustration-card">
+                    <img data-lazy-src="assets/canterburymonroelogolabel.svg" alt="Canterbury Monroe" class="illustration-label">
+                    <img data-lazy-src="assets/canterburymonroe.svg" alt="Canterbury Monroe logo" class="illustration-image">
+                </article>
+            </div>
+
+            <div class="pdf-document" data-pdf="assets/greensparksolarexterioredesign.pdf">
+                <div class="pdf-heading-crop pdf-heading-crop--greenspark" aria-hidden="true">
+                    <img data-lazy-src="assets/greensparksolarlabel.svg" alt="">
+                </div>
+
+                <div class="pdf-controls" aria-label="PDF page navigation">
+                    <button class="pdf-previous" type="button" aria-label="Previous page">
+                        <img data-lazy-src="assets/toggleleft.svg" alt="">
+                    </button>
+                    <button class="pdf-next" type="button" aria-label="Next page">
+                        <img data-lazy-src="assets/toggleright.svg" alt="">
+                    </button>
+                </div>
+
+                <div class="pdf-viewer"></div>
+            </div>
+        </section>
+
+        <section id="typography">
+            <div class="mobile-section-label">
+                <img data-lazy-src="assets/typographysectionlabel.svg" alt="Typography">
+            </div>
+            <h2>Typography</h2>
+
+            <div class="pdf-document" data-pdf="assets/FORTIFIEDbrandidentityV1.5.pdf">
+                <div class="pdf-heading-crop" aria-hidden="true">
+                    <img data-lazy-src="assets/fortifiedbrandguidelineslabel.svg" alt="">
+                </div>
+
+                <div class="pdf-controls" aria-label="PDF page navigation">
+                    <button class="pdf-previous" type="button" aria-label="Previous page">
+                        <img data-lazy-src="assets/toggleleft.svg" alt="">
+                    </button>
+                    <span class="pdf-page-status" aria-live="polite"></span>
+                    <button class="pdf-next" type="button" aria-label="Next page">
+                        <img data-lazy-src="assets/toggleright.svg" alt="">
+                    </button>
+                </div>
+
+                <div class="pdf-viewer"></div>
+            </div>
+
+            <div class="pdf-document" data-pdf="assets/nscadtypographictermsrccomplied.pdf">
+                <div class="pdf-heading-crop pdf-heading-crop--typographic-terms" aria-hidden="true">
+                    <img data-lazy-src="assets/nscadtypographictermslabel.svg" alt="">
+                </div>
+
+                <div class="pdf-controls" aria-label="PDF page navigation">
+                    <button class="pdf-previous" type="button" aria-label="Previous page">
+                        <img data-lazy-src="assets/toggleleft.svg" alt="">
+                    </button>
+                    <span class="pdf-page-status" aria-live="polite"></span>
+                    <button class="pdf-next" type="button" aria-label="Next page">
+                        <img data-lazy-src="assets/toggleright.svg" alt="">
+                    </button>
+                </div>
+
+                <div class="pdf-viewer"></div>
+            </div>
+
+            <div class="pdf-document" data-pdf="assets/fedderwebflyer.pdf">
+                <div class="pdf-heading-crop pdf-heading-crop--fedder-webflyer" aria-hidden="true">
+                    <img data-lazy-src="assets/fedderwebflyerlabel.svg" alt="">
+                </div>
+
+                <div class="pdf-viewer"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="image-overlay" class="image-overlay" aria-hidden="true">
+        <button id="close-overlay" class="close-overlay" type="button" aria-label="Close image">
+            ×
+        </button>
+        <img class="overlay-image" src="" alt="">
+    </div>
+
+    <script src="menu-navigation.js"></script>
+    <script src="sketch.js"></script>
+    <script src="site-lazy-loading.js"></script>
+    <script src="image-overlay.js"></script>
+    <script src="../pdf-viewer.js"></script>
+</body>
+</html>
