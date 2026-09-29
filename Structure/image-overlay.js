@@ -42,7 +42,11 @@ document.addEventListener("DOMContentLoaded", () => {
             window.innerWidth * 0.9 / pageViewport.width,
             window.innerHeight * 0.9 / pageViewport.height
         );
-        const outputScale = (window.devicePixelRatio || 1) * 2;
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        const mobile = window.matchMedia("(max-width: 768px)").matches;
+        const outputScale = mobile
+            ? Math.min(devicePixelRatio, 1.5)
+            : devicePixelRatio * 2;
         const viewport = page.getViewport({ scale: fitScale * outputScale });
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d", { alpha: false });
@@ -196,9 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 moved = true;
                 render();
                 event.preventDefault();
+                return;
             }
-
-            return;
         }
 
         if (!dragging || event.pointerId !== dragPointerId) return;

@@ -161,7 +161,10 @@ function initializePdfViewer(pdfDocument) {
             viewer.clientWidth / widestPage,
             availableHeight / tallestPage
         );
-        const outputScale = window.devicePixelRatio || 1;
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        const outputScale = mobile.matches
+            ? Math.min(devicePixelRatio, 1.5)
+            : devicePixelRatio;
         let pageHeight = 0;
 
         for (const [pageIndex, pageInfo] of pages.entries()) {
