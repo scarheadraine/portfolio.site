@@ -30,6 +30,30 @@ body {
     padding: 40px 20px;
 }
 
+.social-links {
+    position: fixed;
+    top: 50vh;
+    left: 28px;
+    z-index: 20;
+    display: flex;
+    gap: 7px;
+}
+
+.social-links a,
+.social-links img {
+    display: block;
+    width: 48px;
+    height: 48px;
+}
+
+.social-links img {
+    object-fit: contain;
+}
+
+.social-icon--instagram {
+    transform: scale(1.2);
+}
+
 .menu-svg {
     display: block;
     width: 100%;
@@ -210,12 +234,21 @@ section h2 {
     }
 
     .sidebar {
-        position: static;
+        position: relative;
         order: 1;
         width: 100%;
         min-width: 0;
         height: auto;
         padding: 5px 0 20px;
+    }
+
+    .social-links {
+        position: absolute;
+        top: 30px;
+        right: 7px;
+        left: auto;
+        flex-direction: column;
+        gap: 7px;
     }
 
     .desktop-only {
