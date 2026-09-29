@@ -241,14 +241,20 @@
         <button id="close-overlay" class="close-overlay" type="button" aria-label="Close image">
             ×
         </button>
+        <div class="overlay-narrate-slot">
+            <button class="overlay-narrate" type="button" aria-label="Narration coming soon" aria-pressed="false" disabled>
+                <img src="assets/narrate.svg" alt="">
+            </button>
+        </div>
         <img class="overlay-image" src="" alt="">
         <img class="overlay-description" alt="" aria-hidden="true">
+        <audio class="overlay-audio" preload="none"></audio>
     </div>
 
     <script src="menu-navigation.js"></script>
     <script src="sketch.js"></script>
     <script src="site-lazy-loading.js"></script>
     <script src="image-overlay.js"></script>
-    <script src="../pdf-viewer.js"></script>
+    <script src="pdf-viewer.js"></script>
 </body>
 </html>

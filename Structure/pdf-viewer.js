@@ -42,7 +42,7 @@ function observePdfDocuments() {
             observer.unobserve(entry.target);
             loadPdfDocument(entry.target);
         });
-    }, { rootMargin: "600px 0px" });
+    }, { rootMargin: "200px 0px" });
 
     pdfDocuments.forEach((pdfDocument) => observer.observe(pdfDocument));
 }
@@ -70,11 +70,16 @@ function initializePdfViewer(pdfDocument) {
 
     const mobile = window.matchMedia("(max-width: 768px)");
     let pdf;
-    let pages = [];
+    let pdfLoading;
+    let pageCount = 0;
     let currentPageIndex = 0;
     let resizeTimer;
     let touchGesture = null;
     let suppressClickUntil = 0;
+    let renderQueue = Promise.resolve();
+    let desiredPages = new Set();
+    const slides = [];
+    const renderedPages = new Map();
     const digitAssets = {
         "0": "zero.svg",
         "1": "one.svg",
@@ -111,6 +116,52 @@ function initializePdfViewer(pdfDocument) {
         pageStatus.appendChild(separator);
     }
 
+    function buildSlides() {
+        viewer.replaceChildren();
+        slides.length = 0;
+
+        for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+            const slide = document.createElement("div");
+            slide.className = "pdf-slide";
+            slide.setAttribute("role", "group");
+            slide.setAttribute("aria-label", `Page ${pageIndex + 1}`);
+            slide.hidden = !mobile.matches && pageIndex !== currentPageIndex;
+            slides.push(slide);
+            viewer.appendChild(slide);
+        }
+    }
+
+    function removeRenderedPage(pageIndex, renderedPage = renderedPages.get(pageIndex)) {
+        if (!renderedPage || renderedPages.get(pageIndex) !== renderedPage) return;
+        renderedPages.delete(pageIndex);
+        renderedPage.renderTask?.cancel();
+        renderedPage.canvas.remove();
+        window.pdfPageSources.delete(renderedPage.canvas);
+
+        const cleanupPage = () => {
+            renderedPage.canvas.width = 0;
+            renderedPage.canvas.height = 0;
+            renderedPage.page.cleanup();
+        };
+
+        if (renderedPage.renderTask) {
+            renderedPage.renderTask.promise.catch(() => {}).finally(cleanupPage);
+        } else {
+            cleanupPage();
+        }
+    }
+
+    function sizeViewerToCurrentPage() {
+        const renderedPage = renderedPages.get(currentPageIndex);
+        if (!renderedPage) return;
+
+        const pageHeight = renderedPage.canvas.style.height;
+        viewer.style.height = pageHeight;
+        slides.forEach((slide) => {
+            slide.style.height = pageHeight;
+        });
+    }
+
     function updateNavigation() {
         const currentPage = currentPageIndex + 1;
 
@@ -118,98 +169,158 @@ function initializePdfViewer(pdfDocument) {
             pageStatus.replaceChildren();
             pageStatus.setAttribute(
                 "aria-label",
-                `Page ${currentPage} of ${pages.length}`
+                `Page ${currentPage} of ${pageCount}`
             );
             appendNumber(currentPage);
             appendSeparator("/");
-            appendNumber(pages.length);
+            appendNumber(pageCount);
         }
         if (previousButton) previousButton.disabled = currentPageIndex === 0;
-        if (nextButton) nextButton.disabled = currentPageIndex >= pages.length - 1;
+        if (nextButton) nextButton.disabled = currentPageIndex >= pageCount - 1;
 
         if (!mobile.matches) {
-            viewer.querySelectorAll(".pdf-slide").forEach((slide, index) => {
+            slides.forEach((slide, index) => {
                 slide.hidden = index !== currentPageIndex;
             });
         }
+
+        sizeViewerToCurrentPage();
     }
 
-    async function renderPdf() {
-        if (!pdf) {
-            pdf = await pdfjsLib.getDocument(pdfDocument.dataset.pdf).promise;
+    async function renderPage(pageIndex) {
+        if (renderedPages.has(pageIndex) || !desiredPages.has(pageIndex)) return;
 
-            pages = await Promise.all(
-                Array.from({ length: pdf.numPages }, async (_, index) => {
-                    const page = await pdf.getPage(index + 1);
-                    const viewport = page.getViewport({ scale: 1 });
-                    return { page, width: viewport.width, height: viewport.height };
-                })
-            );
+        const page = await pdf.getPage(pageIndex + 1);
+        if (!desiredPages.has(pageIndex)) {
+            page.cleanup();
+            return;
         }
 
-        const renderId = (Number(viewer.dataset.renderId) || 0) + 1;
-        viewer.dataset.renderId = renderId;
-        viewer.replaceChildren();
-
-        const widestPage = Math.max(...pages.map(({ width }) => width));
-        const tallestPage = Math.max(...pages.map(({ height }) => height));
+        const baseViewport = page.getViewport({ scale: 1 });
         const availableHeight = Math.max(
             120,
             window.innerHeight - (mobile.matches ? 280 : 200)
         );
         const scale = Math.min(
-            viewer.clientWidth / widestPage,
-            availableHeight / tallestPage
+            viewer.clientWidth / baseViewport.width,
+            availableHeight / baseViewport.height
         );
+        const viewport = page.getViewport({ scale });
         const devicePixelRatio = window.devicePixelRatio || 1;
-        const outputScale = mobile.matches
-            ? Math.min(devicePixelRatio, 1.5)
-            : devicePixelRatio;
-        let pageHeight = 0;
+        const maxOutputScale = mobile.matches
+            ? Math.min(devicePixelRatio, 1.25)
+            : Math.min(devicePixelRatio, 1.5);
+        const outputScale = Math.min(
+            maxOutputScale,
+            4096 / viewport.width,
+            4096 / viewport.height
+        );
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d", { alpha: false });
+        const renderedPage = { page, canvas, renderTask: null };
 
-        for (const [pageIndex, pageInfo] of pages.entries()) {
-            const viewport = pageInfo.page.getViewport({ scale });
-            const slide = document.createElement("div");
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
+        canvas.width = Math.ceil(viewport.width * outputScale);
+        canvas.height = Math.ceil(viewport.height * outputScale);
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+        canvas.className = "pdf-page";
+        canvas.setAttribute("role", "img");
+        canvas.setAttribute("aria-label", `PDF page ${pageIndex + 1}`);
+        canvas.title = "Tap to zoom and pan";
+        window.pdfPageSources.set(canvas, page);
+        slides[pageIndex].appendChild(canvas);
+        renderedPages.set(pageIndex, renderedPage);
 
-            slide.className = "pdf-slide";
-            slide.setAttribute("role", "group");
-            slide.setAttribute("aria-label", `Page ${pageIndex + 1}`);
-            slide.hidden = !mobile.matches && pageIndex !== currentPageIndex;
-            canvas.width = Math.floor(viewport.width * outputScale);
-            canvas.height = Math.floor(viewport.height * outputScale);
-            canvas.style.width = `${viewport.width}px`;
-            canvas.style.height = `${viewport.height}px`;
-            canvas.className = "pdf-page";
-            canvas.setAttribute("role", "img");
-            canvas.setAttribute("aria-label", `PDF page ${pageIndex + 1}`);
-            canvas.title = "Tap to zoom and pan";
-            window.pdfPageSources.set(canvas, pageInfo.page);
-            slide.appendChild(canvas);
-            viewer.appendChild(slide);
-            pageHeight = Math.max(pageHeight, viewport.height);
-
-            await pageInfo.page.render({
-                canvasContext: context,
-                viewport,
-                transform: outputScale !== 1
-                    ? [outputScale, 0, 0, outputScale, 0, 0]
-                    : null
-            }).promise;
-
-            if (Number(viewer.dataset.renderId) !== renderId) return;
+        if (pageIndex === currentPageIndex) {
+            viewer.style.height = `${viewport.height}px`;
+            slides.forEach((slide) => {
+                slide.style.height = `${viewport.height}px`;
+            });
         }
 
-        viewer.style.height = `${pageHeight}px`;
-        viewer.scrollLeft = currentPageIndex * viewer.clientWidth;
-        updateNavigation();
+        renderedPage.renderTask = page.render({
+            canvasContext: context,
+            viewport,
+            transform: outputScale !== 1
+                ? [outputScale, 0, 0, outputScale, 0, 0]
+                : null
+        });
+
+        try {
+            await renderedPage.renderTask.promise;
+        } catch (error) {
+            removeRenderedPage(pageIndex, renderedPage);
+            if (error.name !== "RenderingCancelledException") throw error;
+            return;
+        }
+
+        if (!desiredPages.has(pageIndex)) {
+            removeRenderedPage(pageIndex, renderedPage);
+        }
     }
 
-    function navigatePage(amount) {
+    function renderPageWindow() {
+        const pageIndexes = mobile.matches
+            ? [currentPageIndex, currentPageIndex + 1]
+                .filter((pageIndex) => pageIndex < pageCount)
+            : [currentPageIndex];
+        desiredPages = new Set(pageIndexes);
+
+        for (const [pageIndex, renderedPage] of renderedPages) {
+            if (!desiredPages.has(pageIndex)) {
+                removeRenderedPage(pageIndex, renderedPage);
+            }
+        }
+
+        renderQueue = renderQueue.then(async () => {
+            for (const pageIndex of pageIndexes) {
+                if (desiredPages.has(pageIndex)) await renderPage(pageIndex);
+            }
+            updateNavigation();
+            delete pdfDocument.dataset.renderError;
+        }).catch((error) => {
+            if (error.name !== "RenderingCancelledException") {
+                pdfDocument.dataset.renderError = "true";
+            }
+        });
+
+        return renderQueue;
+    }
+
+    async function renderPdf() {
+        try {
+            if (!pdf) {
+                if (!pdfLoading) {
+                    pdfLoading = pdfjsLib.getDocument({
+                        url: pdfDocument.dataset.pdf,
+                        disableAutoFetch: true,
+                        disableStream: true,
+                        rangeChunkSize: 65536
+                    }).promise;
+                }
+
+                pdf = await pdfLoading;
+                pageCount = pdf.numPages;
+                currentPageIndex = Math.min(currentPageIndex, pageCount - 1);
+                buildSlides();
+            }
+
+            for (const [pageIndex, renderedPage] of renderedPages) {
+                removeRenderedPage(pageIndex, renderedPage);
+            }
+            viewer.scrollLeft = currentPageIndex * viewer.clientWidth;
+            updateNavigation();
+            await renderPageWindow();
+            delete pdfDocument.dataset.loadError;
+        } catch {
+            pdfDocument.dataset.loadError = "true";
+        }
+    }
+
+    async function navigatePage(amount) {
         const nextPageIndex = Math.max(
             0,
-            Math.min(pages.length - 1, currentPageIndex + amount)
+            Math.min(pageCount - 1, currentPageIndex + amount)
         );
         if (nextPageIndex === currentPageIndex) return;
         currentPageIndex = nextPageIndex;
@@ -219,13 +330,18 @@ function initializePdfViewer(pdfDocument) {
                 left: currentPageIndex * viewer.clientWidth,
                 behavior: "smooth"
             });
+            renderPageWindow();
         } else {
             updateNavigation();
+            await renderPageWindow();
+            const renderedPage = renderedPages.get(currentPageIndex);
+            if (!renderedPage) return;
+
             window.dispatchEvent(new CustomEvent("pdf-page-navigated", {
                 detail: {
                     document: pdfDocument,
-                    page: pages[currentPageIndex].page,
-                    canvas: viewer.querySelectorAll(".pdf-page")[currentPageIndex]
+                    page: renderedPage.page,
+                    canvas: renderedPage.canvas
                 }
             }));
         }
@@ -252,14 +368,18 @@ function initializePdfViewer(pdfDocument) {
     viewer.addEventListener("scroll", () => {
         if (!mobile.matches || !viewer.clientWidth) return;
 
-        currentPageIndex = Math.max(
+        const nextPageIndex = Math.max(
             0,
             Math.min(
-                pages.length - 1,
+                pageCount - 1,
                 Math.round(viewer.scrollLeft / viewer.clientWidth)
             )
         );
+        if (nextPageIndex === currentPageIndex) return;
+
+        currentPageIndex = nextPageIndex;
         updateNavigation();
+        renderPageWindow();
     }, { passive: true });
 
     viewer.addEventListener("pointerdown", (event) => {
@@ -297,9 +417,24 @@ function initializePdfViewer(pdfDocument) {
         event.stopImmediatePropagation();
     }, true);
 
+    if ("IntersectionObserver" in window) {
+        const renderObserver = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                renderPageWindow();
+                return;
+            }
+
+            desiredPages = new Set();
+            for (const [pageIndex, renderedPage] of renderedPages) {
+                removeRenderedPage(pageIndex, renderedPage);
+            }
+        }, { rootMargin: "200px 0px" });
+        renderObserver.observe(pdfDocument);
+    }
+
     window.addEventListener("resize", () => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(renderPdf, 120);
+        resizeTimer = setTimeout(renderPdf, 180);
     });
 
     renderPdf();

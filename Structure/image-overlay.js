@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.getElementById("image-overlay");
     const overlayImage = overlay.querySelector(".overlay-image");
     const overlayDescription = overlay.querySelector(".overlay-description");
+    const narrateButton = overlay.querySelector(".overlay-narrate");
+    const narrationAudio = overlay.querySelector(".overlay-audio");
     const closeButton = document.getElementById("close-overlay");
 
     let scale = 1;
@@ -49,6 +51,12 @@ document.addEventListener("DOMContentLoaded", () => {
         render();
     }
 
+    function stopNarration() {
+        narrationAudio.pause();
+        narrationAudio.currentTime = 0;
+        narrateButton.setAttribute("aria-pressed", "false");
+    }
+
     async function renderPdfOverlayPage(page, renderId) {
         const pageViewport = page.getViewport({ scale: 1 });
         const fitScale = Math.min(
@@ -58,8 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const devicePixelRatio = window.devicePixelRatio || 1;
         const mobile = window.matchMedia("(max-width: 768px)").matches;
         const outputScale = mobile
-            ? Math.min(devicePixelRatio, 1.5)
-            : devicePixelRatio * 2;
+            ? Math.min(devicePixelRatio, 1.25)
+            : Math.min(devicePixelRatio, 1.5);
         const viewport = page.getViewport({ scale: fitScale * outputScale });
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d", { alpha: false });
@@ -83,9 +91,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const page = image instanceof HTMLCanvasElement
             ? window.pdfPageSources?.get(image)
             : null;
+        const work = image.closest(".pdf-document");
         const descriptionSource = image.dataset.overlayDescription
-            || image.closest(".pdf-document")?.dataset.overlayDescription;
+            || work?.dataset.overlayDescription;
+        const narrationSource = image.dataset.narrationSrc
+            || work?.dataset.narrationSrc;
         const hasDescription = Boolean(descriptionSource);
+
+        stopNarration();
+        if (narrationSource) {
+            narrationAudio.src = narrationSource;
+            narrateButton.disabled = false;
+            narrateButton.setAttribute("aria-label", "Play narration");
+        } else {
+            narrationAudio.removeAttribute("src");
+            narrationAudio.load();
+            narrateButton.disabled = true;
+            narrateButton.setAttribute("aria-label", "Narration coming soon");
+        }
 
         if (descriptionSource) {
             overlayDescription.src = descriptionSource;
@@ -113,6 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function closeImage() {
         overlayRenderId++;
         overlayPdfDocument = null;
+        stopNarration();
+        narrationAudio.removeAttribute("src");
+        narrationAudio.load();
         overlayDescription.removeAttribute("src");
         overlay.classList.remove("has-description", "has-landscape-description");
         overlay.classList.remove("is-open");
@@ -135,6 +161,30 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!(event.target instanceof Element)) return;
         const image = event.target.closest(".illustration-image, .pdf-page");
         if (image) openImage(image);
+    });
+
+    narrateButton.addEventListener("click", async () => {
+        if (narrateButton.disabled) return;
+
+        if (narrationAudio.paused) {
+            try {
+                await narrationAudio.play();
+                narrateButton.setAttribute("aria-pressed", "true");
+                narrateButton.setAttribute("aria-label", "Pause narration");
+            } catch {
+                narrateButton.setAttribute("aria-pressed", "false");
+            }
+            return;
+        }
+
+        narrationAudio.pause();
+        narrateButton.setAttribute("aria-pressed", "false");
+        narrateButton.setAttribute("aria-label", "Play narration");
+    });
+
+    narrationAudio.addEventListener("ended", () => {
+        narrateButton.setAttribute("aria-pressed", "false");
+        narrateButton.setAttribute("aria-label", "Play narration");
     });
 
     overlay.addEventListener("wheel", (event) => {
