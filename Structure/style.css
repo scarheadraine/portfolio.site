@@ -171,6 +171,8 @@ section h2 {
 
 .overlay-image {
     display: block;
+    position: relative;
+    z-index: 2;
     max-width: 90vw;
     max-height: 90vh;
     width: auto;
@@ -183,6 +185,31 @@ section h2 {
     will-change: transform;
 }
 
+.overlay-description {
+    position: absolute;
+    top: 50%;
+    left: 1vw;
+    z-index: 1;
+    display: none;
+    width: min(38vw, 520px);
+    max-height: 80vh;
+    height: auto;
+    object-fit: contain;
+    object-position: left center;
+    pointer-events: none;
+    transform: translateY(-50%);
+    user-select: none;
+}
+
+.image-overlay.has-description .overlay-description {
+    display: block;
+}
+
+.image-overlay.has-description .overlay-image {
+    max-width: 60vw;
+    margin-left: 40vw;
+}
+
 .overlay-image.is-dragging {
     cursor: grabbing;
 }
@@ -191,7 +218,7 @@ section h2 {
     position: absolute;
     top: 15px;
     right: 25px;
-    z-index: 1;
+    z-index: 3;
     border: 0;
     background: none;
     color: #fff;
@@ -703,6 +730,21 @@ canvas.pdf-page {
 @media (max-width: 768px) {
     .pdf-heading-crop--typographic-terms {
         aspect-ratio: 460 / 84;
+    }
+
+    .image-overlay.has-description .overlay-image {
+        max-height: 62vh;
+        max-width: 90vw;
+        margin-left: 0;
+    }
+
+    .overlay-description {
+        top: auto;
+        bottom: 2vh;
+        left: 5vw;
+        width: 90vw;
+        max-height: 18vh;
+        transform: none;
     }
 
     .pdf-heading-crop--typographic-terms img {

@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.getElementById("image-overlay");
     const overlayImage = overlay.querySelector(".overlay-image");
+    const overlayDescription = overlay.querySelector(".overlay-description");
     const closeButton = document.getElementById("close-overlay");
 
     let scale = 1;
@@ -22,6 +23,18 @@ document.addEventListener("DOMContentLoaded", () => {
     function render() {
         overlayImage.style.transform =
             `translate3d(${panX}px, ${panY}px, 0) scale(${scale})`;
+    }
+
+    function getImageCenterOffset() {
+        const imageRect = overlayImage.getBoundingClientRect();
+        const overlayRect = overlay.getBoundingClientRect();
+
+        return {
+            x: imageRect.left + imageRect.width / 2
+                - (overlayRect.left + overlayRect.width / 2) - panX,
+            y: imageRect.top + imageRect.height / 2
+                - (overlayRect.top + overlayRect.height / 2) - panY
+        };
     }
 
     function reset() {
@@ -70,11 +83,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const page = image instanceof HTMLCanvasElement
             ? window.pdfPageSources?.get(image)
             : null;
+        const descriptionSource = image.dataset.overlayDescription;
+        const hasDescription = Boolean(descriptionSource);
+
+        if (descriptionSource) {
+            overlayDescription.src = descriptionSource;
+        } else {
+            overlayDescription.removeAttribute("src");
+        }
+
         overlayPdfDocument = page ? image.closest(".pdf-document") : null;
         overlayImage.src = image instanceof HTMLCanvasElement
             ? image.toDataURL("image/png")
             : image.src;
         overlayImage.alt = image.alt || image.getAttribute("aria-label") || "";
+        overlay.classList.toggle("has-description", hasDescription);
+        overlay.classList.toggle(
+            "has-landscape-description",
+            hasDescription && image.naturalWidth > image.naturalHeight
+        );
         overlay.classList.add("is-open");
         overlay.setAttribute("aria-hidden", "false");
         reset();
@@ -85,6 +112,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function closeImage() {
         overlayRenderId++;
         overlayPdfDocument = null;
+        overlayDescription.removeAttribute("src");
+        overlay.classList.remove("has-description", "has-landscape-description");
         overlay.classList.remove("is-open");
         overlay.setAttribute("aria-hidden", "true");
         reset();
@@ -121,10 +150,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const rect = overlay.getBoundingClientRect();
         const cursorX = event.clientX - (rect.left + rect.width / 2);
         const cursorY = event.clientY - (rect.top + rect.height / 2);
+        const centerOffset = getImageCenterOffset();
         const ratio = newScale / oldScale;
 
-        panX = cursorX - (cursorX - panX) * ratio;
-        panY = cursorY - (cursorY - panY) * ratio;
+        panX = cursorX - centerOffset.x
+            - (cursorX - centerOffset.x - panX) * ratio;
+        panY = cursorY - centerOffset.y
+            - (cursorY - centerOffset.y - panY) * ratio;
         scale = newScale;
 
         if (scale === 1) {
@@ -186,10 +218,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const rect = overlay.getBoundingClientRect();
                 const centerX = (first.x + second.x) / 2 - (rect.left + rect.width / 2);
                 const centerY = (first.y + second.y) / 2 - (rect.top + rect.height / 2);
+                const centerOffset = getImageCenterOffset();
                 const ratio = nextScale / scale;
 
-                panX = centerX - (centerX - panX) * ratio;
-                panY = centerY - (centerY - panY) * ratio;
+                panX = centerX - centerOffset.x
+                    - (centerX - centerOffset.x - panX) * ratio;
+                panY = centerY - centerOffset.y
+                    - (centerY - centerOffset.y - panY) * ratio;
                 scale = nextScale;
 
                 if (scale === 1) {
