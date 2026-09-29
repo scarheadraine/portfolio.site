@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayPdfDocument = page ? image.closest(".pdf-document") : null;
         overlayImage.src = image instanceof HTMLCanvasElement
             ? image.toDataURL("image/png")
-            : image.src;
+            : image.dataset.overlaySrc || image.currentSrc || image.src;
         overlayImage.alt = image.alt || image.getAttribute("aria-label") || "";
         overlay.classList.toggle("has-description", hasDescription);
         overlay.classList.toggle(

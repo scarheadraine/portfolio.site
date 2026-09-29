@@ -7,6 +7,14 @@ function loadLazyAsset(element) {
     if (element instanceof HTMLImageElement) {
         element.fetchPriority = "low";
         element.decoding = "async";
+        if (element.dataset.lazySizes) {
+            element.sizes = element.dataset.lazySizes;
+            delete element.dataset.lazySizes;
+        }
+        if (element.dataset.lazySrcset) {
+            element.srcset = element.dataset.lazySrcset;
+            delete element.dataset.lazySrcset;
+        }
     }
 
     if (element instanceof HTMLObjectElement) {
@@ -37,7 +45,11 @@ function startSiteContentLoading() {
                 observer.unobserve(entry.target);
                 loadLazyAsset(entry.target);
             });
-        }, { rootMargin: "500px 0px" });
+        }, {
+            rootMargin: window.matchMedia("(max-width: 768px)").matches
+                ? "100px 0px"
+                : "300px 0px"
+        });
 
         scrollAssets.forEach((asset) => observer.observe(asset));
     }
