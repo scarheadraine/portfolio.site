@@ -417,6 +417,15 @@ function initializePdfViewer(pdfDocument) {
         event.stopImmediatePropagation();
     }, true);
 
+    window.addEventListener("pageshow", () => {
+        if (!mobile.matches) return;
+
+        currentPageIndex = 0;
+        viewer.scrollLeft = 0;
+        updateNavigation();
+        renderPageWindow();
+    });
+
     if ("IntersectionObserver" in window) {
         const renderObserver = new IntersectionObserver(([entry]) => {
             if (entry.isIntersecting) {

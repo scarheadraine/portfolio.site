@@ -235,7 +235,7 @@ section h2 {
     position: absolute;
     top: 8vh;
     left: 15vw;
-    z-index: 4;
+    z-index: 1;
     display: grid;
     place-items: center;
     width: min(11vw, 160px);
