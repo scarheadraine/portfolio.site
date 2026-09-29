@@ -663,7 +663,6 @@ canvas.pdf-page {
     flex: 0 0 auto;
     max-width: none;
     background: #fff;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
     cursor: zoom-in;
     touch-action: pan-x;
 }
