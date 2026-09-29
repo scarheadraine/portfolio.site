@@ -83,7 +83,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const page = image instanceof HTMLCanvasElement
             ? window.pdfPageSources?.get(image)
             : null;
-        const descriptionSource = image.dataset.overlayDescription;
+        const descriptionSource = image.dataset.overlayDescription
+            || image.closest(".pdf-document")?.dataset.overlayDescription;
         const hasDescription = Boolean(descriptionSource);
 
         if (descriptionSource) {
