@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.getElementById("image-overlay");
     const overlayImage = overlay.querySelector(".overlay-image");
     const overlayDescription = overlay.querySelector(".overlay-description");
+    const overlayDescriptionText = overlay.querySelector(".overlay-description-text");
     const narrateButton = overlay.querySelector(".overlay-narrate");
     const narrationAudio = overlay.querySelector(".overlay-audio");
     const closeButton = document.getElementById("close-overlay");
@@ -115,6 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             overlayDescription.removeAttribute("src");
         }
+        overlayDescriptionText.dataset.src = descriptionSource || "";
+        overlayDescriptionText.textContent = window.getDescriptionText?.(descriptionSource) || "";
 
         overlayPdfDocument = page ? image.closest(".pdf-document") : null;
         overlayImage.src = image instanceof HTMLCanvasElement
@@ -140,6 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
         narrationAudio.removeAttribute("src");
         narrationAudio.load();
         overlayDescription.removeAttribute("src");
+        overlayDescriptionText.textContent = "";
+        overlayDescriptionText.dataset.src = "";
         overlay.classList.remove("has-description", "has-landscape-description");
         overlay.classList.remove("is-open");
         overlay.setAttribute("aria-hidden", "true");
@@ -156,6 +161,57 @@ document.addEventListener("DOMContentLoaded", () => {
         reset();
         renderPdfOverlayPage(event.detail.page, renderId).catch(() => {});
     });
+
+    const zoomHints = new Map();
+    let hintFrame = 0;
+
+    function updateHints() {
+        hintFrame = 0;
+        const overlayOpen = overlay.classList.contains("is-open");
+        const targets = new Set(document.querySelectorAll(".illustration-image, .pdf-page"));
+
+        zoomHints.forEach((hint, target) => {
+            if (targets.has(target)) return;
+            hint.remove();
+            zoomHints.delete(target);
+        });
+
+        targets.forEach((target) => {
+            let hint = zoomHints.get(target);
+            if (!hint) {
+                hint = document.createElement("img");
+                hint.src = "assets/zoominicon.svg";
+                hint.alt = "";
+                hint.className = "zoom-hint";
+                hint.setAttribute("aria-hidden", "true");
+                document.body.append(hint);
+                zoomHints.set(target, hint);
+            }
+
+            const rect = target.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            const visible = !overlayOpen && rect.width > 0 && rect.height > 0 &&
+                y > 0 && y < window.innerHeight && x > 0 && x < window.innerWidth;
+
+            hint.classList.toggle("is-visible", visible);
+            if (visible) {
+                hint.style.left = `${x}px`;
+                hint.style.top = `${y}px`;
+            }
+        });
+    }
+
+    function scheduleHints() {
+        if (!hintFrame) hintFrame = requestAnimationFrame(updateHints);
+    }
+
+    window.addEventListener("scroll", scheduleHints, { passive: true });
+    window.addEventListener("resize", scheduleHints);
+    window.addEventListener("load", scheduleHints);
+    setInterval(updateHints, 500);
+    new MutationObserver(scheduleHints).observe(overlay, { attributes: true, attributeFilter: ["class"] });
+    scheduleHints();
 
     document.addEventListener("click", (event) => {
         if (!(event.target instanceof Element)) return;

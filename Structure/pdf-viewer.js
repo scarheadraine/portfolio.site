@@ -102,7 +102,11 @@ function initializePdfViewer(pdfDocument) {
             const digit = document.createElement("img");
             digit.src = `assets/${digitAssets[character]}`;
             digit.alt = "";
-            number.appendChild(digit);
+            digit.classList.add("has-readable");
+            const text = document.createElement("span");
+            text.className = "readable-label";
+            text.textContent = character;
+            number.append(digit, text);
         }
 
         pageStatus.appendChild(number);

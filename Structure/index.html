@@ -5,11 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raine Cerankosky</title>
 
+    <script>
+        if (localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark");
+        const lang = localStorage.getItem("lang");
+        if (["readable", "ja", "zh", "nl", "ar", "fr", "it", "ru", "es", "sv"].includes(lang)) {
+            document.documentElement.classList.add("readable");
+            document.documentElement.dataset.lang = lang;
+        }
+    </script>
     <link rel="stylesheet" href="style.css">
     <link rel="preload" href="assets/frame0000.png" as="image" fetchpriority="high" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js" fetchpriority="high"></script>
 </head>
 <body>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode"     aria-pressed="false"><img src="assets/darkmodeicon.svg" alt=""></button>
+        <button id="translate-toggle" class="theme-toggle readable-toggle" type="button" aria-label="Translate" aria-expanded="false" aria-controls="language-list"><img src="assets/translateicon.svg" alt=""></button>
+    <ul id="language-list" class="language-list" hidden>
+        <li><button type="button" data-lang="readable" aria-label="Readable"><img src="assets/readablenewicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="ja" aria-label="カタカナ"><img src="assets/katakanatranslateicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="zh" aria-label="中文"><img src="assets/chinesetranslateicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="nl" aria-label="Nederlands"><img src="assets/dutchtranslateicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="ar" aria-label="العربية"><img src="assets/arabictranslateicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="fr" aria-label="Français"><img src="assets/frenchtranslateicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="it" aria-label="Italiano"><img src="assets/italiantranslateicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="ru" aria-label="Русский"><img src="assets/russiantranslateicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="es" aria-label="Español"><img src="assets/spanishtranslateicon.svg" alt=""></button></li>
+        <li><button type="button" data-lang="sv" aria-label="Svenska"><img src="assets/swedishtranslateicon.svg" alt=""></button></li>
+    </ul>
     <aside class="sidebar">
         <object
             id="standard-menu"
@@ -26,6 +48,13 @@
             type="image/svg+xml"
             aria-label="Portfolio navigation">
         </object>
+
+        <nav class="menu-text" aria-label="Portfolio navigation">
+            <a href="#front-end-development" data-l="frontendsectionlabel">Front End Development</a>
+            <a href="#illustration" data-l="illustrationsectionlabel">Illustration</a>
+            <a href="#graphic-design" data-l="graphicdesignsectionlabel">Graphic Design</a>
+            <a href="#typography" data-l="typographysectionlabel">Typography</a>
+        </nav>
 
         <nav class="social-links" aria-label="Social links">
             <a href="https://www.linkedin.com/in/raine-cerankosky/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
@@ -248,9 +277,14 @@
         </div>
         <img class="overlay-image" src="" alt="">
         <img class="overlay-description" alt="" aria-hidden="true">
+        <p class="overlay-description-text"></p>
         <audio class="overlay-audio" preload="none"></audio>
     </div>
 
+    <script src="theme-toggle.js"></script>
+    <script src="translations.js"></script>
+    <script src="translations-cjk.js"></script>
+    <script src="translate.js"></script>
     <script src="menu-navigation.js"></script>
     <script src="sketch.js"></script>
     <script src="site-lazy-loading.js"></script>
