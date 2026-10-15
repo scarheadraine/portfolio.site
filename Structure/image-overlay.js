@@ -196,8 +196,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             hint.classList.toggle("is-visible", visible);
             if (visible) {
-                hint.style.left = `${x}px`;
-                hint.style.top = `${y}px`;
+                // Document coordinates so the browser scrolls the hint with the image
+                const left = `${Math.round(x + window.scrollX)}px`;
+                const top = `${Math.round(y + window.scrollY)}px`;
+                if (hint.style.left !== left) hint.style.left = left;
+                if (hint.style.top !== top) hint.style.top = top;
             }
         });
     }

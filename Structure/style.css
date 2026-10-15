@@ -415,7 +415,7 @@ html[data-lang="ar"] .overlay-description-text {
 }
 
 .zoom-hint {
-    position: fixed;
+    position: absolute;
     z-index: 150;
     width: 64px;
     height: auto;
